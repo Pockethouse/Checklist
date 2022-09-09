@@ -29,6 +29,9 @@ UITextFieldDelegate {
     
     var itemToEdit: ChecklistItem?
     
+    @IBOutlet weak var shouldRemindSwitch: UISwitch!
+   @IBOutlet weak var datePicker: UIDatePicker!
+    
     @IBOutlet weak var doneBarButton: UIBarButtonItem!
     @IBOutlet weak var textField: UITextField!
     
@@ -40,13 +43,24 @@ UITextFieldDelegate {
     @IBAction func done() {
       if let item = itemToEdit {
         item.text = textField.text!
+          
+          item.shouldRemind = shouldRemindSwitch.isOn  // add this
+             item.dueDate = datePicker.date               // add this
+          item.scheduleNotification()
+
         delegate?.itemDetailViewController(
     self,
           didFinishEditing: item)
       } else {
         let item = ChecklistItem()
         item.text = textField.text!
+          item.checked = false
+          item.shouldRemind = shouldRemindSwitch.isOn  // add this
+            item.dueDate = datePicker.date
+         
+          
         delegate?.itemDetailViewController(self, didFinishAdding: item)
+          
     } }
 
     override func viewDidLoad() {
@@ -55,6 +69,8 @@ UITextFieldDelegate {
         title = "Edit Item"
         textField.text = item.text
         doneBarButton.isEnabled = true
+          shouldRemindSwitch.isOn = item.shouldRemind  // add this
+              datePicker.date = item.dueDate               // add this
     } }
   //disable selections
     // MARK: - Table View Delegates
@@ -82,6 +98,7 @@ UITextFieldDelegate {
         with: string)
       if newText.isEmpty {
         doneBarButton.isEnabled = false
+          
       } else {
         doneBarButton.isEnabled = true
       }
@@ -91,6 +108,13 @@ UITextFieldDelegate {
       doneBarButton.isEnabled = false
     return true
     }
-    
+    @IBAction func shouldRemindToggled(_ switchControl: UISwitch) {
+      textField.resignFirstResponder()
+      if switchControl.isOn {
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options: [.alert, .sound]) {_, _
+    in
+    } }
+    }
     
 }
